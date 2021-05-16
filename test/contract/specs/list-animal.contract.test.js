@@ -7,8 +7,8 @@ describe('Animal Service', () => {
         beforeAll(async () => {
             await provider.setup();
             await provider.addInteraction({
+                state: 'there are animals',
                 uponReceiving: 'a request to list all animals',
-                state: "has animals",
                 withRequest: {
                     method: 'GET',
                     path: '/animals'
@@ -19,21 +19,31 @@ describe('Animal Service', () => {
                         {
                             name: Matchers.like('manchas'),
                             breed: Matchers.like("Bengali"),
-                            gender: Matchers.like("Female"),
-                            vaccinated: Matchers.boolean(true)
-                        }
+                            gender: Matchers.term(
+                                {generate: "Female", matcher: "Female|Male"}
+                            ),
+                            isVaccinated: Matchers.boolean(true),
+                            vaccines: Matchers.eachLike(
+                                [
+                                    "rabia"
+                                ],
+                                {min: 1}
+                            )
+                        },
+                        {min: 2}
                     )
                 }
             });
         });
 
-        test('should return the correct data', async () => {
+        it('should return the correct data', async () => {
             const response = await AnimalController.list();
             expect(response.data).toMatchSnapshot();
             
             await provider.verify()
         });
 
-        afterAll(() => provider.finalize());
+        afterAll(async() => { await provider.finalize();
+        });
     });
 });
