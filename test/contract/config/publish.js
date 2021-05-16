@@ -10,3 +10,4 @@ const opts = {
 };
 
 new Publisher(opts).publishPacts();
+
